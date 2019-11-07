@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Homework-4</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        <link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        <script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+    </head>
+    <body class="vscode-light">
+        <p>Giust Alberto Mat. 211460</p>
+<h1 id="homework-4">Homework-4</h1>
+<h2 id="client-side-filtering-exercise-2">Client side filtering Exercise 2</h2>
+<p>This webpage permits to select a employer from a dropdown menu and, when clicked the option, the table is composed with the date of the selected user. If you open the firefox ispector and you search for the dropdown menu (<code>&lt;select&gt;</code>), you can see that 2 different Javascript functions are triggered: if you <code>onfocus</code> on the select menu, <code>fetchUserData()</code> will be called, while if you click on an option, <code>selectUser()</code> will be called. These are the definitions of the two funcions:</p>
+<pre><code class="language-javascript"><div>
+<span class="hljs-comment">//localhost:8081/WebGoat/lesson_js/clientSideFiltering.js</span>
+<span class="hljs-keyword">var</span> dataFetched = <span class="hljs-literal">false</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">selectUser</span>(<span class="hljs-params"></span>) </span>{
+
+    <span class="hljs-keyword">var</span> newEmployeeID = $(<span class="hljs-string">"#UserSelect"</span>).val();
+    <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"employeeRecord"</span>).innerHTML = <span class="hljs-built_in">document</span>.getElementById(newEmployeeID).innerHTML;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">fetchUserData</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">if</span> (!dataFetched) {
+        dataFetched = <span class="hljs-literal">true</span>;
+        ajaxFunction(<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"userID"</span>).value);
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ajaxFunction</span>(<span class="hljs-params">userId</span>) </span>{
+    $.<span class="hljs-keyword">get</span>("clientSideFiltering/salaries?userId=" + userId, function (result, status) {
+        ...
+    });
+}
+</div></code></pre>
+<p><code>fetchUserData()</code> is called once, thanks to <code>dataFetched</code> variable, and this function calls a n Ajax function that retrieves user data by id but, if you look at the response body, you can see that all the employers are retrieved, and when you click on a <code>&lt;option&gt;</code>, the user id is retrieved, and the relative employer is shown in the table. So, if you change the option id with another id, like the id <strong>112</strong> (found by looking at the JSON response of the api call <code>clientSideFiltering/saaries?userId=</code>, that can be intercepted using ZAP, or by looking at firefox Network tab), the CEO data is shown.</p>
+<p><img src="file:////home/alberto/Documents/sectest/homework-4/hw-4-img1.png" alt="normal behaviour">
+<img src="file:////home/alberto/Documents/sectest/homework-4/hw-4-img2.png" alt="exploited behaviour"></p>
+<h3 id="solution-of-the-exercise">Solution of the exercise</h3>
+<p>As shown in the second image, the salary of the CEO, <strong>Neville Bartholomew</strong> is 450000.</p>
+<h2 id="client-side-filtering-exercise-3">Client side filtering Exercise 3</h2>
+<p>If you open the firefox inspector, you will notice two strange HTML lines: <code>&lt;input id=&quot;discount&quot; value=&quot;0&quot; type=&quot;hidden&quot;&gt;0</code>, and <code>&lt;!--Checkout code: webgoat, owasp, owasp-webgoat--&gt;</code>. You can try to insert one of these checkout code, but the most discount you can get, it will be 50%. If you insert a code, you will notice that the text of the input field will change, with the value of the discount, but if you change this value manually, you won't obtain ay discount. This means that the evaluation of the input text happens after the discount application.</p>
+<p>There is a Javascript script that explain how these actions are perfomed: <code>/WebGoat/lesson_js/clientSideFilteringFree.js</code>. If you scroll through the function definition, you will see there is an Ajax function, triggered when you <em>blur</em> off the checkout input field. Inside this function, there is a get call to <code>/WebGoat/clientSideFiltering/challenge-store/coupons/ + discount_code</code>. If you call this function, you will obtain the JSON response with the discount percentage. If you don't insert any <strong>discount_code</strong>, you will obtain a list of all the discount codes, also the one with 100% discount!</p>
+<pre><code><div>{
+  &quot;codes&quot; : [ {
+    &quot;code&quot; : &quot;webgoat&quot;,
+    &quot;discount&quot; : 25
+  }, {
+    &quot;code&quot; : &quot;owasp&quot;,
+    &quot;discount&quot; : 25
+  }, {
+    &quot;code&quot; : &quot;owasp-webgoat&quot;,
+    &quot;discount&quot; : 50
+  }, {
+    &quot;code&quot; : &quot;get_it_for_free&quot;,
+    &quot;discount&quot; : 100
+  } ]
+}
+
+</div></code></pre>
+<p>I noticed later that if you don't input any discount code and you blur off the input field, the GET call is mad with blank input, retrieving the same as above.</p>
+<h3 id="solution-of-the-exercise-1">Solution of the exercise</h3>
+<p>The discount code is: <strong>get_it_for_free</strong>.</p>
+
+    </body>
+    </html>

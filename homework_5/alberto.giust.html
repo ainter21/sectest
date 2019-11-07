@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Homework_5</title>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="homework5">Homework_5</h1>
+<p>To exploit the integer overflow on this program you have to find the right integer to put in the <strong>item_quantity</strong> input. This happens because there is a product operation between the price of the product and the quantity of the item the user wants to buy. This kind of operation can really easy lead to integer overflow.
+You can use a simple brute force algorithm to find the number (The following code has this goal).</p>
+<pre><code class="language-c"><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>{
+
+    <span class="hljs-keyword">int</span>  a = <span class="hljs-number">1500</span>;
+    
+    <span class="hljs-keyword">int</span> b = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">int</span> res;
+
+
+    <span class="hljs-keyword">do</span>{
+        res+=a;
+        b++;
+    }
+    <span class="hljs-keyword">while</span> (res!= <span class="hljs-number">-1200</span>);
+
+    <span class="hljs-built_in">printf</span>(<span class="hljs-string">"b=%d\n"</span>, b );
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+</div></code></pre>
+<p>The output of this algorithm is: <strong>214748364</strong>. So you can just input this number in the program, and you will obtain the solution.</p>
+<h2 id="fix">Fix</h2>
+<p>To fix the problem you can limit the number of iPhone an user can buy, with the price capped with the max integer value. This program finds integer overflow and handle it with an error, preventing the user to buy iPhones with a non positive price.</p>
+<pre><code class="language-c"><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>
+</span>{
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"Hello, which product do you want to buy?\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"1) IPhone 11\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"2) IPhone 11 Pro\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"3) IPhone 11 Pro Max Max\n"</span>);
+
+	<span class="hljs-comment">// Get item</span>
+	<span class="hljs-keyword">int</span> item_choice;
+	<span class="hljs-built_in">scanf</span>(<span class="hljs-string">"%d"</span>, &amp;item_choice);
+
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"Great device, how many?\n"</span>);
+	<span class="hljs-keyword">int</span> item_quantity;
+	<span class="hljs-built_in">scanf</span>(<span class="hljs-string">"%d"</span>, &amp;item_quantity);
+
+	<span class="hljs-keyword">if</span> (item_quantity &lt;= <span class="hljs-number">0</span>) {
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"You should buy at least one Iphone!\n"</span>);
+		<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+	}
+
+	<span class="hljs-keyword">int</span> insurance = <span class="hljs-number">1200</span>;
+	<span class="hljs-keyword">if</span> (item_choice == <span class="hljs-number">3</span>)
+	{
+		<span class="hljs-keyword">int</span> price_no_insurance = <span class="hljs-number">1500</span> * item_quantity;
+
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"item_quantity: %d\n"</span>, item_quantity);
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"item_quantity: %d\n"</span>, price_no_insurance/<span class="hljs-number">1500</span>);
+
+		<span class="hljs-keyword">if</span>(item_quantity != price_no_insurance/<span class="hljs-number">1500</span>){
+			<span class="hljs-built_in">printf</span>(<span class="hljs-string">"Integer overflow!!: %d\n"</span>, price_no_insurance);
+			<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+		}
+		
+		<span class="hljs-keyword">int</span> price = price = price_no_insurance + insurance;
+
+		<span class="hljs-keyword">if</span>(price &lt; <span class="hljs-number">0</span>){
+			<span class="hljs-built_in">printf</span>(<span class="hljs-string">"Integer overflow!!: %d\n"</span>, price);
+			<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+		}
+		<span class="hljs-keyword">if</span> (price == <span class="hljs-number">0</span>) {
+			<span class="hljs-built_in">printf</span>(<span class="hljs-string">"You solved the problem\n"</span>);
+			<span class="hljs-built_in">printf</span>(<span class="hljs-string">"The Iphone Max Max is yours\n"</span>);
+			<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+		}
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"You have to pay €%d\n"</span>, price);
+	}
+	<span class="hljs-keyword">else</span>
+	{
+		<span class="hljs-keyword">if</span> (item_quantity &gt; <span class="hljs-number">3</span>) {
+			<span class="hljs-built_in">printf</span>(<span class="hljs-string">"You can buy maximum 3\n"</span>);
+			<span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+		}
+		<span class="hljs-keyword">int</span> price = <span class="hljs-number">1000</span>*item_quantity;
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"You have to pay €%d\n"</span>, price);
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+
+</div></code></pre>
+<p>The <strong>price_no_insurance</strong> contains the product of the operation. This variable is then checked for integer overflow, using the inverse operation (You make the division and you control that you obtain a coherent solution).</p>
+<p>The maximum number of iPhone that an user can buy is <strong>1431654</strong>.</p>
+
+    </body>
+    </html>

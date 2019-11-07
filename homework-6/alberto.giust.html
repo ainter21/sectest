@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Homework-6</title>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="homework-6">Homework-6</h1>
+<h2 id="exploitation-no-version-string">Exploitation (no version string)</h2>
+<p>If you compile the program using <code>gcc -g -O0 -fno-stack-protector exercise.c &amp;&amp; ./a.out</code>, you can exploit the input of the password to login without knowing the right password. In fact, the two strings are allocated one after the other, and you can overflow the buffer string and overwrite the memory allocated for the <code>secret</code>, as shown in the image. If you know the maximum length of the password string and the maximum length of the secret, you can fill the input text with the max number of characters for password, and then the same characters again, and it will override the content of the secret.</p>
+<p><img src="file:////home/alberto/Documents/sectest/homework-6/stack.png" alt="stack-1"></p>
+<h3 id="example">Example</h3>
+<ul>
+<li>Input: <strong>aaaaaaaaaa</strong>aaaaaaaaaa. <strong>Bold</strong> a characters will be allocated in the password string, while normal a will be allocated in the secret. The result is shown in the screenshot below.</li>
+</ul>
+<p><img src="file:////home/alberto/Documents/sectest/homework-6/Annotation%202019-10-30%20161148.png" alt="exploit-no-version"></p>
+<h2 id="exploitation-version-string">Exploitation (version string)</h2>
+<p>If you know the length of the string between the password and secret strings, you can use buffer overflow in the same way as above, knowing that you have to put wild characters between the two.</p>
+<h3 id="example-1">Example</h3>
+<ul>
+<li>Input: <strong>aaaaaaaaaa</strong> <em>1.0</em> aaaaaaaaaa: <strong>Bold</strong> a will be allocated in password string, <em>italic</em> characters will be allocated in version string and normal a will be allocated in secret string.</li>
+</ul>
+<p><img src="file:////home/alberto/Documents/sectest/homework-6/Annotation%202019-10-30%20161841.png" alt="exploit-version"></p>
+<h2 id="vulnerability-fix">Vulnerability fix</h2>
+<p>You can fix the vulnerability in 2 ways: you can <code>strcpy()</code> the secret after the user input the text, or you can limit the characters for the user input. I choose the second option, since the password string has a specified length. You can use the <code>char *fgets(char *s, int size, FILE *stream);</code> function. The code fixed is shown below. You must add <code>password[strlen(password)-1] = '\0';</code> after the fgets because this function takes as an input also the <code>\n</code> characher.</p>
+<pre><code class="language-c"><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string.h&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> 
+</span>{
+
+ <span class="hljs-keyword">char</span> secret[<span class="hljs-number">10</span>];
+ <span class="hljs-keyword">char</span> version[<span class="hljs-number">3</span>] = <span class="hljs-string">"1.0"</span>;
+ <span class="hljs-keyword">char</span> password[<span class="hljs-number">10</span>];
+
+ <span class="hljs-built_in">memset</span>(secret, <span class="hljs-number">0</span>, <span class="hljs-number">10</span>);
+
+ <span class="hljs-built_in">printf</span>(<span class="hljs-string">"%x\n"</span>, &amp;secret);
+ <span class="hljs-built_in">printf</span>(<span class="hljs-string">"%x\n"</span>, &amp;password);
+
+ <span class="hljs-comment">//printf("%s\n", secret);</span>
+ <span class="hljs-comment">//printf("%s\n", password);</span>
+
+ <span class="hljs-built_in">strcpy</span>(secret, <span class="hljs-string">"pass"</span>);
+
+ <span class="hljs-built_in">printf</span>(<span class="hljs-string">"Please enter the password: \n"</span>);
+
+ fgets(password,<span class="hljs-built_in">strlen</span>(password), <span class="hljs-built_in">stdin</span>);
+ password[<span class="hljs-built_in">strlen</span>(password)<span class="hljs-number">-1</span>] = <span class="hljs-string">'\0'</span>;
+
+ <span class="hljs-keyword">if</span> (<span class="hljs-built_in">strcmp</span>(password, secret) == <span class="hljs-number">0</span>) {
+  <span class="hljs-built_in">printf</span>(<span class="hljs-string">"\nCorrect password!\n"</span>);
+ } <span class="hljs-keyword">else</span> {
+  <span class="hljs-built_in">printf</span>(<span class="hljs-string">"\nWrong password!\n"</span>);
+ }
+
+ <span class="hljs-built_in">printf</span>(<span class="hljs-string">"%s\n"</span>, secret);
+ <span class="hljs-built_in">printf</span>(<span class="hljs-string">"%s\n"</span>, password);
+
+
+ <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+
+
+</div></code></pre>
+
+    </body>
+    </html>
